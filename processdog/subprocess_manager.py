@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#coding=UTF-8
 import logging
 import queue
 import subprocess
@@ -98,25 +99,3 @@ class ManagerThread(object):
                 break
             logger.debug('Sleeping for %d', self.poll)
             time.sleep(self.poll)
-
-if __name__ == '__main__':
-
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(name)-12s %(threadName)-12s %(levelname)-8s %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
-    logger.info('Starting Process')
-
-    manager = ManagerThread(4, poll=1)
-    for i in range(4):
-        manager.jobs.put(['sleep', '4'])
-    for i in range(2):
-        manager.jobs.put(['sleep', '60'])
-    manager.execute(timeout=6)
-
-    for i in range(4):
-        manager.jobs.put(['sleep', '4'])
-    for i in range(2):
-        manager.jobs.put(['sleep', '10'])
-    manager.execute()
