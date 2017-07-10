@@ -53,22 +53,23 @@ class ManagerThread(object):
         self.lock = threading.Lock()
         self.poll = poll
 
-    def execute(self, timeout):
+    def execute(self, timeout=None):
         logger.info('Manager execution starting')
         while True:
-            with self.lock:
-                """ kill threads that have been running for
-                longer than the timeout period. Add their
-                ID's to the pool of free threads.
-                """
-                logger.debug('checking for timedout threads')
-                for thread in self.running:
-                    if time.time() - thread.start_time > timeout:
-                        thread.kill_process()
-                        if thread.finished:
-                            self.running.remove(thread)
-                            self.free.append(thread.thread_id)
-                            thread.join()
+            if timeout != None:
+                with self.lock:
+                    """ kill threads that have been running for
+                    longer than the timeout period. Add their
+                    ID's to the pool of free threads.
+                    """
+                    logger.debug('checking for timedout threads')
+                    for thread in self.running:
+                        if time.time() - thread.start_time > timeout:
+                            thread.kill_process()
+                            if thread.finished:
+                                self.running.remove(thread)
+                                self.free.append(thread.thread_id)
+                                thread.join()
 
             with self.lock:
                 """Clean up finished threads. Add their
@@ -112,4 +113,10 @@ if __name__ == '__main__':
         manager.jobs.put(['sleep', '4'])
     for i in range(2):
         manager.jobs.put(['sleep', '60'])
-    manager.execute(6)
+    manager.execute(timeout=6)
+
+    for i in range(4):
+        manager.jobs.put(['sleep', '4'])
+    for i in range(2):
+        manager.jobs.put(['sleep', '10'])
+    manager.execute()
