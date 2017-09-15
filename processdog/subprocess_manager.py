@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding=UTF-8
+# coding=UTF-8
 import logging
 import queue
 import subprocess
@@ -7,6 +7,7 @@ import threading
 import time
 
 logger = logging.getLogger(__name__)
+
 
 class WorkerThread(threading.Thread):
     """Subclass of Thread that allows a thread to be spawned that runs a
@@ -22,25 +23,29 @@ class WorkerThread(threading.Thread):
         self.job_queue = job_queue
         self.cmd = self.job_queue.get()
         self.start_time = time.time()
+
         def target():
             logger.info('Subprocess started')
-            self.process = subprocess.Popen(self.cmd,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.process = subprocess.Popen(
+                self.cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL)
             self.process.communicate()
             self.finished = True
             self.job_queue.task_done()
             logger.info('Subprocess finished')
-        super().__init__(name='Thread-{}'.format(self.thread_id)
-            ,target=target)
+        super().__init__(name='Thread-{}'.format(self.thread_id),
+                         target=target)
         self.finished = False
         logger.debug('Thread %d Initialized', self.thread_id)
 
     def kill_process(self):
         if self.is_alive():
             logger.warning('Terminating subprocess on Thread-%d',
-                self.thread_id)
+                           self.thread_id)
             self.process.terminate()
             self.finished = True
+
 
 class ManagerThread(object):
     def __init__(self, num_threads, poll=1):
@@ -57,9 +62,9 @@ class ManagerThread(object):
     def execute(self, timeout=None):
         logger.info('Manager execution starting')
         while True:
-            if timeout != None:
+            if timeout is not None:
                 with self.lock:
-                    """ kill threads that have been running for
+                    """Kill threads that have been running for
                     longer than the timeout period. Add their
                     ID's to the pool of free threads.
                     """
@@ -73,7 +78,7 @@ class ManagerThread(object):
                                 thread.join()
 
             with self.lock:
-                """Clean up finished threads. Add their
+                """Clean up finished threads. Add
                 ID's to the pool of free threads.
                 """
                 logger.debug('Checking for finished threads')
@@ -83,18 +88,19 @@ class ManagerThread(object):
                         self.free.append(thread.thread_id)
                         thread.join()
 
-            while self.jobs.empty() == False and len(self.free) > 0:
+            while not self.jobs.empty() and len(self.free) > 0:
                 """If there are jobs remaining and free threads then
                 spawn new threads for each pair of jobs and threads.
                 """
                 with self.lock:
                     if len(self.free) > 0:
                         thread_id = self.free.pop(0)
-                        thread = WorkerThread(thread_id, self.jobs)
+                        thread = WorkerThread(
+                            thread_id, self.jobs, self.kwargs)
                         self.running.append(thread)
                         thread.start()
 
-            if self.jobs.empty() == True and len(self.running) == 0:
+            if self.jobs.empty() and len(self.running) == 0:
                 logger.info('Manager execution finished')
                 break
             logger.debug('Sleeping for %d', self.poll)

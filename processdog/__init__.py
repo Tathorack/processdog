@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding=UTF-8
+# coding=UTF-8
 from .subprocess_manager import ManagerThread
 from .subprocess_manager import WorkerThread
 
