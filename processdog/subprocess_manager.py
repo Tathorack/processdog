@@ -48,15 +48,18 @@ class WorkerThread(threading.Thread):
 
 
 class ManagerThread(object):
-    def __init__(self, num_threads, poll=1):
+    def __init__(self, num_threads, jobs=None, poll=1):
         if num_threads < 1:
             raise ValueError('Number of threads must be greater than 1')
-        self.jobs = queue.Queue()
+        if jobs is None:
+            self.jobs = queue.Queue()
+        else:
+            self.jobs = jobs
+        self.lock = threading.Lock()
         self.free = []
         self.running = []
         for t in range(num_threads):
             self.free.append(t)
-        self.lock = threading.Lock()
         self.poll = poll
 
     def execute(self, timeout=None):
@@ -94,7 +97,7 @@ class ManagerThread(object):
                 """
                 with self.lock:
                     if len(self.free) > 0:
-                        thread_id = self.free.pop(0)
+                        thread_id = self.free.pop()
                         thread = WorkerThread(
                             thread_id, self.jobs, self.kwargs)
                         self.running.append(thread)
@@ -105,3 +108,6 @@ class ManagerThread(object):
                 break
             logger.debug('Sleeping for %d', self.poll)
             time.sleep(self.poll)
+
+    def addjob(self, job):
+        self.jobs.put(job)
