@@ -32,5 +32,5 @@ if __name__ == '__main__':
     for i in range(3):
         manager.jobs.put(['sleep', '4'])
     for i in range(3):
-        manager.jobs.put(['sleep', '10-'])
+        manager.jobs.put(['sleep', '10'])
     manager.execute()
