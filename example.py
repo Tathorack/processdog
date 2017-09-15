@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#coding=UTF-8
+# coding=UTF-8
 import processdog
 import logging
 
@@ -7,7 +7,8 @@ if __name__ == '__main__':
     # Set up logger
     logger = logging.getLogger('processdog')
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(threadName)-12s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter(
+        '%(threadName)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
@@ -21,16 +22,16 @@ if __name__ == '__main__':
     the second 3 will be killed after the timeout of 6 seconds.
     """
     for i in range(3):
-        manager.jobs.put(['sleep', '4'])
+        manager.addjob(['sleep', '4'])
     for i in range(3):
-        manager.jobs.put(['sleep', '60'])
+        manager.addjob(['sleep', '60'])
     manager.execute(timeout=6)
 
     """All the sleep commands will complete successfully due to the lack
     of a timeout argument.
     """
     for i in range(3):
-        manager.jobs.put(['sleep', '4'])
+        manager.addjob(['sleep', '4'])
     for i in range(3):
-        manager.jobs.put(['sleep', '10'])
+        manager.addjob(['sleep', '10'])
     manager.execute()
