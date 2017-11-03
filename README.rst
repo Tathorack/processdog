@@ -21,9 +21,14 @@ Manager(num_threads, jobs=None, poll=1)
 =======================================
 Creates a manager thread object that can then be be given a queue of subprocess commands to execute
 
+Initialization paramaters
+
 * ``num_threads`` - maximum number of threads to
 * ``jobs`` - queue.Queue object containg the subprocess commands to execute. Defaults to empty if not set.
 * ``poll`` - how often to poll the worker threads to see if they have completed or timedout. Defaults to 1 second.
+
+Class methods
+
 * ``addjob(job)`` - adds a job to the queue
 
 Usage example

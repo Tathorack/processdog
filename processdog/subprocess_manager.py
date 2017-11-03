@@ -99,7 +99,7 @@ class ManagerThread(object):
                     if len(self.free) > 0:
                         thread_id = self.free.pop()
                         thread = WorkerThread(
-                            thread_id, self.jobs, self.kwargs)
+                            thread_id, self.jobs)
                         self.running.append(thread)
                         thread.start()
 
